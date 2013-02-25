@@ -72,7 +72,7 @@ void calculateThreaded(long threadcount, long until) {
     }
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec)/1000000 +(double) (tv2.tv_sec - tv1.tv_sec);
-    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numersPerProcess*threadcount,sum);
+    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numersPerProcess*threadcount,sum+1);
     free(threads);
 }
 
