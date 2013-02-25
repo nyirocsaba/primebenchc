@@ -22,7 +22,7 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 #include <sys/time.h>
 #include <math.h>
 
-long sum, numersPerProcess;
+long sum, numbersPerProcess;
 pthread_mutex_t sum_mutex;
 
 
@@ -52,7 +52,7 @@ long primeCountInterval(long from, long to) {
 
 void *primeCountPrint(void *arg) {
     long i = (long)arg;
-    long pc = primeCountInterval(numersPerProcess*i,numersPerProcess*(i+1));
+    long pc = primeCountInterval(numbersPerProcess*i,numbersPerProcess*(i+1));
     pthread_mutex_lock(&sum_mutex);
     sum += pc;
     pthread_mutex_unlock(&sum_mutex);
@@ -62,7 +62,7 @@ void *primeCountPrint(void *arg) {
 
 void calculateThreaded(long threadcount, long until) {
     sum = 0;
-    numersPerProcess = ceill((float)until/(float)threadcount);
+    numbersPerProcess = ceill((float)until/(float)threadcount);
     long i;
 
     pthread_t* threads;
@@ -90,7 +90,7 @@ void calculateThreaded(long threadcount, long until) {
     }
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec)/1000000 +(double) (tv2.tv_sec - tv1.tv_sec);
-    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numersPerProcess*threadcount,sum+1);
+    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numbersPerProcess*threadcount,sum+1);
     free(threads);
 }
 
