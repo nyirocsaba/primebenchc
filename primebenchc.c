@@ -4,9 +4,9 @@
 #include <sys/time.h>
 #include <math.h>
 
-typedef struct  {
-    long start, end, pc;
-} ThreadParams;
+long sum, numersPerProcess;
+pthread_mutex_t sum_mutex;
+
 
 int isPrime(long num) {
     if (num<3) {
@@ -33,17 +33,19 @@ long primeCountInterval(long from, long to) {
 }
 
 void *primeCountPrint(void *arg) {
-    ThreadParams *tp = (ThreadParams*)(arg);
-
-    tp->pc = primeCountInterval(tp->start,tp->end);
+    long i = (long)arg;
+    long pc = primeCountInterval(numersPerProcess*i,numersPerProcess*(i+1));
+    pthread_mutex_lock(&sum_mutex);
+    sum += pc;
+    pthread_mutex_unlock(&sum_mutex);
     pthread_exit(NULL);
 }
 
 
 void calculateThreaded(long threadcount, long until) {
-    long numersPerProcess = ceill((float)until/(float)threadcount);
+    sum = 0;
+    numersPerProcess = ceill((float)until/(float)threadcount);
     long i;
-    long pc = 0;
 
     pthread_t* threads;
     pthread_attr_t attr;
@@ -52,18 +54,12 @@ void calculateThreaded(long threadcount, long until) {
 
     int rc;
     threads = (pthread_t*)malloc(sizeof(pthread_t)*(threadcount));
-    ThreadParams **tp;
-    tp = malloc(sizeof(ThreadParams*));
 
     struct timeval  tv1, tv2;
     gettimeofday(&tv1, NULL);
 
     for (i=0; i<threadcount; i++) {
-        tp[i] = malloc(sizeof(ThreadParams));
-        tp[i]->pc = 0;
-        tp[i]->start = i*numersPerProcess;
-        tp[i]->end = (i+1)*numersPerProcess;
-        rc = pthread_create(&threads[i], &attr, primeCountPrint, (void*)(tp[i]));
+        rc = pthread_create(&threads[i], &attr, primeCountPrint, (void*)i);
         if (rc!=0) {
             printf("Couldn't create thread!\n");
             exit(-1);
@@ -76,12 +72,8 @@ void calculateThreaded(long threadcount, long until) {
     }
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec)/1000000 +(double) (tv2.tv_sec - tv1.tv_sec);
-    for(i=0; i<threadcount; i++) {
-      pc += tp[i]->pc;
-    }
-    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numersPerProcess*threadcount,pc+1);
+    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numersPerProcess*threadcount,sum);
     free(threads);
-    free(tp);
 }
 
 
