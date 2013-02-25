@@ -100,11 +100,18 @@ int main(int argc, char *argv[])
     printf("All primebenchc code is Copyright 2013 by Nyiro Zoltan-Csaba.\n\nThis program is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or (at\nyour option) any later version.\n\nThis program is distributed in the hope that it will be useful, but\nWITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY\nor FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License\nfor more details.\n\n");
     printf("You should have received a copy of the GNU General Public License\nalong with this program as the file LICENSE.txt; if not, please see\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.\n\n\n");
     if (argc<3) {
-        printf("Wrong arguments!\nUseage: primebenchc [interval top value] [max number of threads]");
+        printf("Wrong arguments!\nUseage: primebenchc [interval top value] [max number of threads]\nprimebenchc [interval top value] [min number of threads] [max number of threads]");
         return 0;
     }
     long until = atol(argv[1]);
-    int threadcount = atoi(argv[2]);
+    int threadstart = 1;
+    int threadcount;
+    if (argc>3) {
+        threadstart = atoi(argv[2]);
+        threadcount = atoi(argv[3]);
+    } else {
+        threadcount = atoi(argv[2]);
+    }
 
     if (until<2) {
         printf("Wrong interval top value!");
@@ -112,7 +119,7 @@ int main(int argc, char *argv[])
     }
     printf("The calculations are made up to %d thread(s).\n", threadcount);
     int i;
-    for (i=1; i<=threadcount; i++) {
+    for (i=threadstart; i<=threadcount; i++) {
         calculateThreaded(i,until);
     }
     return 0;
