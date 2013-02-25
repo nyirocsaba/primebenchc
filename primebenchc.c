@@ -1,5 +1,5 @@
 /*
-All primebenchc code is Copyright 2013 by the original author.
+All primebenchc code is Copyright 2013 by Nyiro Zoltan-Csaba.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ void calculateThreaded(long threadcount, long until) {
 
 int main(int argc, char *argv[])
 {
-    printf("All primebenchc code is Copyright 2013 by the original author.\n\nThis program is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or (at\nyour option) any later version.\n\nThis program is distributed in the hope that it will be useful, but\nWITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY\nor FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License\nfor more details.\n\n");
+    printf("All primebenchc code is Copyright 2013 by Nyiro Zoltan-Csaba.\n\nThis program is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or (at\nyour option) any later version.\n\nThis program is distributed in the hope that it will be useful, but\nWITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY\nor FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License\nfor more details.\n\n");
     printf("You should have received a copy of the GNU General Public License\nalong with this program as the file LICENSE.txt; if not, please see\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.\n\n\n");
     if (argc<3) {
         printf("Wrong arguments!\nUseage: primebenchc [interval top value] [max number of threads]");
