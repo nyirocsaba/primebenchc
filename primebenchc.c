@@ -22,6 +22,8 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 #include <sys/time.h>
 #include <math.h>
 #include <getopt.h>
+#include <sched.h>
+#include <unistd.h>
 
 #define _PRIMEBENCHC_VERSION "v0.2"
 
@@ -32,6 +34,10 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 long sum, numbersPerProcess;
 pthread_mutex_t sum_mutex;
 
+struct schedulerParams {
+    int enabled, priority;
+} sc;
+
 static void usage(char *prog_name, char *msg)
 {
    if (msg != NULL)
@@ -40,12 +46,21 @@ static void usage(char *prog_name, char *msg)
    fprintf(stderr, "Usage: %s [options]\n", prog_name);
    fprintf(stderr, "Options are:\n");
    #define fpe(msg) fprintf(stderr, "\t%s", msg);          /* Shorter */
-   fpe("--im <numeric>   Set intervcal maximum\n");
-   fpe("--tmin <numeric> Set the minimum number of threads\n");
-   fpe("--tmax <numeric> Set the maximum number of threads\n");
-   fpe("--showlicense    List license message\n");
-   fpe("--hidelicense    Don't list license message\n");
-   fprintf(stderr, "Defaults: %s --im 100000 --tmin 1 --tmax 8 --showlicense\n", prog_name);
+   fpe("--im <numeric>         Set intervcal maximum\n");
+   fpe("--tmin <numeric>       Set the minimum number of threads\n");
+   fpe("--tmax <numeric>       Set the maximum number of threads\n");
+   fpe("--showlicense          List license message\n");
+   fpe("--hidelicense          Don't list license message\n");
+   fpe("--default-scheduler    Use the system default scheduler\n");
+   fpe("                       Only 0 priority is accepted\n");
+   fpe("--fifo-scheduler       Use the real time scheduler\n");
+   fpe("                       Priority from 0 to 90\n");
+   fpe("--rr-scheduler         Use the round robin scheduler\n");
+   fpe("                       Priority from 0 to 90\n");
+   fpe("--scheduler-priority   Set the threads priority\n");
+   fpe("                       to -1 and highest possible\n");
+   fpe("                       priority will be used\n");
+   fprintf(stderr, "Defaults: %s --im 100000 --tmin 1 --tmax 8 --showlicense --default-scheduler\n", prog_name);
    exit(EXIT_FAILURE);
 }
 
@@ -74,6 +89,11 @@ long primeCountInterval(long from, long to) {
 }
 
 void *primeCountPrint(void *arg) {
+    if (sc.enabled) {
+        struct sched_param param;
+        param.sched_priority = sched_get_priority_max(sc.enabled);
+        pthread_setschedparam(pthread_self(), sc.enabled, &param);
+    }
     long i = (long)arg;
     long pc = primeCountInterval(numbersPerProcess*i,numbersPerProcess*(i+1));
     pthread_mutex_lock(&sum_mutex);
@@ -84,7 +104,6 @@ void *primeCountPrint(void *arg) {
 
 
 void calculateThreaded(long threadcount, long until) {
-    sum = 0;
     numbersPerProcess = ceill((float)until/(float)threadcount);
     long i;
 
@@ -96,7 +115,7 @@ void calculateThreaded(long threadcount, long until) {
     int rc;
     threads = (pthread_t*)malloc(sizeof(pthread_t)*(threadcount));
 
-    struct timeval  tv1, tv2;
+    struct timeval tv1, tv2;
     gettimeofday(&tv1, NULL);
 
     for (i=0; i<threadcount; i++) {
@@ -108,13 +127,15 @@ void calculateThreaded(long threadcount, long until) {
     }
 
     pthread_attr_destroy(&attr);
+
     void *status;
-    pthread_attr_destroy(&attr);
     for(i=0; i<threadcount; i++) {
       pthread_join(threads[i], &status);
     }
+
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec)/1000000 +(double) (tv2.tv_sec - tv1.tv_sec);
+
     printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numbersPerProcess*threadcount,sum+1);
     free(threads);
 }
@@ -126,13 +147,19 @@ int main(int argc, char *argv[])
     int threadstart = 1;
     int threadcount = 8;
     static int listlicense = 1;
+    sc.enabled = 0;
+    sc.priority = -1;
 
     static struct option long_options[] = {
                    {"showlicense", no_argument, &listlicense, 1},
                    {"hidelicense", no_argument, &listlicense, 0},
-                   {"im",   required_argument, 0, 'i'},
-                   {"tmin", required_argument, 0, 'c'},
-                   {"tmax", required_argument, 0, 'f'}
+                   {"default-scheduler", no_argument, &sc.enabled, 0},
+                   {"fifo-scheduler",    no_argument, &sc.enabled, SCHED_FIFO},
+                   {"rr-scheduler",      no_argument, &sc.enabled, SCHED_RR},
+                   {"im",       required_argument, 0, 'i'},
+                   {"tmin",     required_argument, 0, 'c'},
+                   {"tmax",     required_argument, 0, 'f'},
+                   {"priority", required_argument, 0, 'p'}
     };
     int opt;
     int option_index = 0;
@@ -158,6 +185,12 @@ int main(int argc, char *argv[])
                     usage(argv[0], "\nInvalid --tmax value!\n\n");
                 }
                 break;
+            case 'p':
+                sc.priority = atol(optarg);
+                if (sc.priority<1) {
+                    usage(argv[0], "\nInvalid --priority value!\n\n");
+                }
+                break;
             default:  usage(argv[0], NULL);
         }
     }
@@ -166,6 +199,18 @@ int main(int argc, char *argv[])
         usage(argv[0], "\nInvalid --tmax value!\n--tmax should be greater or equal then --tmin\n\n");
     }
 
+    if (sc.enabled) {
+        if(geteuid() != 0) {
+            usage(argv[0], "\nThe selected type of scheduler can be used only with root privilidges\n\n");
+        }
+        struct sched_param param;
+        param.sched_priority = sc.priority;
+        if (sc.priority==-1) {
+            param.sched_priority = sched_get_priority_max(sc.enabled);
+        }
+        param.sched_priority = (param.sched_priority>0)?param.sched_priority-1:0;
+        pthread_setschedparam(pthread_self(), sc.enabled, &param);
+    }
 
     printf("PrimeBenchc %s\n", _PRIMEBENCHC_VERSION);
     if (listlicense) {
@@ -175,7 +220,9 @@ int main(int argc, char *argv[])
     printf("The calculations are made up to %d thread(s).\n", threadcount);
     int i;
     for (i=threadstart; i<=threadcount; i++) {
+        sum = 0;
         calculateThreaded(i,until);
+        sleep(1);
     }
     return 0;
 }

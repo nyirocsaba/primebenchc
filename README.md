@@ -5,14 +5,23 @@ primebenchc - multi-threaded prime number benchmark
 
 Compile: make release
 
-Usage: ./primebenchc [options]
+Usage: ./bin/Debug/primebenchc [options]
 Options are:
-	--im <numeric>   Set intervcal maximum
-	--tmin <numeric> Set the minimum number of threads
-	--tmax <numeric> Set the maximum number of threads
-	--showlicense    List license message
-	--hidelicense    Don't list license message
-Defaults: ./primebenchc --im 100000 --tmin 1 --tmax 8 --showlicense
+	--im <numeric>         Set intervcal maximum
+	--tmin <numeric>       Set the minimum number of threads
+	--tmax <numeric>       Set the maximum number of threads
+	--showlicense          List license message
+	--hidelicense          Don't list license message
+	--default-scheduler    Use the system default scheduler
+	                       Only 0 priority is accepted
+	--fifo-scheduler       Use the real time scheduler
+	                       Priority from 0 to 90
+	--rr-scheduler         Use the round robin scheduler
+	                       Priority from 0 to 90
+	--scheduler-priority   Set the threads priority
+	                       to -1 and highest possible
+	                       priority will be used
+Defaults: ./bin/Debug/primebenchc --im 100000 --tmin 1 --tmax 8 --showlicense --default-scheduler
 
 
 How can you help:
