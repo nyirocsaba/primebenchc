@@ -12,7 +12,7 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
 for more details.
 
 You should have received a copy of the GNU General Public License
-alongArchFix with this program as the file LICENSE.txt; if not, please see
+along with this program as the file LICENSE.txt; if not, please see
 http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 */
 
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     sc.enabled = 0;
     sc.priority = -1;
 
-    static struct option longArchFix_options[] = {
+    static struct option long_options[] = {
                    {"showlicense", no_argument, &listlicense, 1},
                    {"hidelicense", no_argument, &listlicense, 0},
                    {"default-scheduler", no_argument, &sc.enabled, 0},
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     int opt;
     int option_index = 0;
 
-    while ((opt = getopt_long(argc, argv, "i:c:f:",longArchFix_options, &option_index))!=-1) {
+    while ((opt = getopt_long(argc, argv, "i:c:f:",long_options, &option_index))!=-1) {
         switch (opt) {
             case 0: break;
             case 'i':
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
     printf("PrimeBenchc %s\n", _PRIMEBENCHC_VERSION);
     if (listlicense) {
         printf("All primebenchc code is Copyright 2013 by Nyiro Zoltan-Csaba.\n\nThis program is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or (at\nyour option) any later version.\n\nThis program is distributed in the hope that it will be useful, but\nWITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY\nor FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License\nfor more details.\n\n");
-        printf("You should have received a copy of the GNU General Public License\nalongArchFix with this program as the file LICENSE.txt; if not, please see\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.\n\n\n");
+        printf("You should have received a copy of the GNU General Public License\nalong with this program as the file LICENSE.txt; if not, please see\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.\n\n\n");
     }
     printf("The calculations are made up to %d thread(s).\n", threadcount);
     int i;
