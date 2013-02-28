@@ -30,7 +30,7 @@ How can you help:
 
 2. Suggest new features via the issue tracker
 
-3. E-mail to <primebenchc@gmail.com> with subject "My Results" and attache your results and PC configuration.
+3. E-mail to <primebenchc@gmail.com> with subject "My Results" and attach your results and PC configuration.
 
 You can output results directly to file: ./primebenchc [options] > results.txt
 
