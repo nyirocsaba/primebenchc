@@ -1,17 +1,20 @@
-primebenchc
-===========
+PrimeBenchc v0.3
+================
 
 primebenchc - multi-threaded prime number benchmark
 
 Compile: make release
 
-Execute test: ./bin/Release/primebenchc [interval top value] [max number of threads]
+Usage: ./bin/Debug/primebenchc [options]
+Options are:
+	--im <numeric>         Set intervcal maximum
+	--tmin <numeric>       Set the minimum number of threads
+	--tmax <numeric>       Set the maximum number of threads
+	--showlicense          List license message
+	--hidelicense          Don't list license message
 
+Defaults: ./bin/Debug/primebenchc --im 100000 --tmin 1 --tmax 8 --showlicense
 
-Sample:
-./bin/Release/primebenchc 100000 8
-
-Will measure required time to find and count all the prime numbers on [0,100000] interval starting with 1 thread then incrementing up to 8 threads
 
 How can you help:
 
@@ -19,12 +22,13 @@ How can you help:
 
 2. Suggest new features via the issue tracker
 
-3. E-mail to <primebenchc@gmail.com> with subject "My Results" and attache your results and PC configuration.
+3. E-mail to <primebenchc@gmail.com> with subject "My Results" and attach your results and PC configuration.
 
-You can output results directly to file: ./bin/Release/primebenchc [interval top value] [max number of threads] > results.txt
+You can output results directly to file: ./primebenchc [options] > results.txt
 
-Also could be grat if you also attache the lshw output of the system you run the tests.
+Also could be grat if you also attach the lshw output of the system you run the tests.
 
 
 Thank you,
 Csaba
+
