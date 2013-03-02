@@ -23,21 +23,13 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 #include <math.h>
 #include <getopt.h>
 
-#define _PRIMEBENCHC_VERSION "v0.3"
+#define _PRIMEBENCHC_VERSION "v0.4"
 
 
 #define handle_error_en(en, msg) \
 do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
-#ifdef __i386__
- typedef long longArchFix;
-#endif
-
-#ifdef __x86_64__
- typedef int longArchFix;
-#endif
-
-longArchFix sum, numbersPerProcess;
+unsigned int sum, numbersPerProcess;
 pthread_mutex_t sum_mutex;
 
 static void usage(char *prog_name, char *msg)
@@ -57,11 +49,11 @@ static void usage(char *prog_name, char *msg)
    exit(EXIT_FAILURE);
 }
 
-int isPrime(longArchFix num) {
+int isPrime(unsigned int num) {
     if (num<3) {
         return 0;
     }
-    longArchFix i;
+    unsigned int i;
     for(i=2;i<num;i++)
     {
         if(num%i==0)
@@ -70,9 +62,9 @@ int isPrime(longArchFix num) {
     return 1;
 }
 
-longArchFix primeCountInterval(longArchFix from, longArchFix to) {
-    longArchFix primecount = 0;
-    longArchFix i=0;
+unsigned int primeCountInterval(unsigned int from, unsigned int to) {
+    unsigned int primecount = 0;
+    unsigned int i=0;
     for(i=from; i<=to; i++) {
         if (isPrime(i)>0) {
             primecount++;
@@ -82,8 +74,8 @@ longArchFix primeCountInterval(longArchFix from, longArchFix to) {
 }
 
 void *primeCountPrint(void *arg) {
-    longArchFix i = (longArchFix)arg;
-    longArchFix pc = primeCountInterval(numbersPerProcess*i,numbersPerProcess*(i+1));
+    unsigned int i = (unsigned int)arg;
+    unsigned int pc = primeCountInterval(numbersPerProcess*i,numbersPerProcess*(i+1));
     pthread_mutex_lock(&sum_mutex);
     sum += pc;
     pthread_mutex_unlock(&sum_mutex);
@@ -91,10 +83,10 @@ void *primeCountPrint(void *arg) {
 }
 
 
-void calculateThreaded(longArchFix threadcount, longArchFix until) {
+void calculateThreaded(unsigned int threadcount, unsigned int until) {
     sum = 0;
     numbersPerProcess = ceill((float)until/(float)threadcount);
-    longArchFix i;
+    unsigned int i;
 
     pthread_t* threads;
     pthread_attr_t attr;
@@ -121,14 +113,14 @@ void calculateThreaded(longArchFix threadcount, longArchFix until) {
     }
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec)/1000000 +(double) (tv2.tv_sec - tv1.tv_sec);
-    printf("%fs - %ld threads [%ld,%ld] = %ld primes found\n", time_spent, threadcount, 0L, numbersPerProcess*threadcount,sum+1);
+    printf("%fs - %u threads [%u,%u] = %u primes found\n", time_spent, threadcount, 0, numbersPerProcess*threadcount,sum+1);
     free(threads);
 }
 
 
 int main(int argc, char *argv[])
 {
-    longArchFix until = 100000;
+    unsigned int until = 100000;
     int threadstart = 1;
     int threadcount = 8;
     static int listlicense = 1;
